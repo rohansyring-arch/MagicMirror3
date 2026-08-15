@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magic Mirror</title>
     
-    <!-- Google Digital Font -->
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
@@ -24,7 +23,7 @@
             overflow: hidden;
         }
 
-        /* --- Top Layout: Left & Right Columns --- */
+        /* --- Main Layout: Top Section (Left & Right) --- */
         .top-section {
             display: flex;
             justify-content: space-between;
@@ -36,7 +35,7 @@
         .left-column {
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: center; /* Centers elements in the open space */
             align-items: center;
             width: 45%;
             height: 100%;
@@ -52,22 +51,22 @@
             height: 100%;
         }
 
-        /* --- Emblem Border Styling --- */
+        /* --- Common Border Styling (Emblems) --- */
         .module-border {
-            border: 2px solid #333;
+            border: 2px solid #333; /* Dark grey border */
             border-radius: 15px;
             padding: 25px;
-            background: rgba(10, 10, 10, 0.6);
+            background: rgba(10, 10, 10, 0.6); /* Slight background to separate from pure black */
         }
 
-        /* --- Time & Date Module --- */
+        /* --- Top Left: Time & Date --- */
         .time-container {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 40px; /* Spacing between clock and stocks */
             width: 80%;
         }
         #time {
-            font-family: 'Share Tech Mono', monospace;
+            font-family: 'Share Tech Mono', monospace; /* Digital Font */
             font-size: 7rem;
             line-height: 1;
             margin-bottom: 10px;
@@ -80,11 +79,11 @@
             letter-spacing: 1px;
         }
 
-        /* --- Stock Ticker Module --- */
+        /* --- Bottom Left: Stocks --- */
         .stock-container {
             width: 80%;
             text-align: center;
-            opacity: 0.65;
+            opacity: 0.65; /* Slightly transparent/less bright */
         }
         .stock-header {
             font-size: 1rem;
@@ -101,17 +100,17 @@
             animation: fade 5s infinite;
         }
         .stock-symbol {
-            color: #aaa;
+            color: #aaa; /* Grey/White for company name */
             font-weight: bold;
         }
-        .positive-data { color: #4caf50; }
-        .negative-data { color: #f44336; }
+        .positive-data { color: #4caf50; } /* Green for up */
+        .negative-data { color: #f44336; } /* Red for down */
 
-        /* --- Weather Map Module (Pure Grayscale) --- */
+        /* --- Right: Weather Map --- */
         .weather-container {
             width: 100%;
-            height: 80%;
-            padding: 10px;
+            height: 80%; /* Shrunk slightly for aesthetics */
+            padding: 10px; /* Border padding */
         }
         iframe {
             width: 100%;
@@ -122,7 +121,7 @@
             filter: grayscale(100%) invert(90%) contrast(150%);
         }
 
-        /* --- Bottom Greeting Section --- */
+        /* --- Bottom Section: Greeting --- */
         .bottom-section {
             height: 15%;
             width: 100%;
@@ -148,7 +147,6 @@
 <body>
 
     <div class="top-section">
-        <!-- Left Column -->
         <div class="left-column">
             <div class="time-container module-border">
                 <div id="time">00:00:00</div>
@@ -161,7 +159,6 @@
             </div>
         </div>
 
-        <!-- Right Column -->
         <div class="right-column">
             <div class="weather-container module-border">
                 <iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=f&metricWind=mph&zoom=8&overlay=radar&product=radar&marker=true&lat=42.03&lon=-93.62"></iframe>
@@ -169,7 +166,6 @@
         </div>
     </div>
 
-    <!-- Bottom Greeting -->
     <div class="bottom-section">
         <div id="greeting">Loading...</div>
     </div>
@@ -232,15 +228,15 @@
             }
         }
 
-        // --- 2. Time & Date Logic ---
+        // --- 2. Clock, Date, and Greeting Logic ---
         function updateTime() {
             const now = new Date();
             
-            // Format Digital Clock
-            const timeOptions = { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: false };
+            // Time
+            const timeOptions = { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: false }; // Set hour12: true for AM/PM
             document.getElementById('time').textContent = now.toLocaleTimeString('en-US', timeOptions);
             
-            // Format Date
+            // Date
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
             document.getElementById('date').textContent = now.toLocaleDateString('en-US', dateOptions);
 
@@ -251,7 +247,7 @@
         setInterval(updateTime, 1000);
         updateTime();
 
-        // --- 3. Rotating Stock Ticker Logic ---
+        // --- 3. Rotating Stocks Logic ---
         const stocks = [
             { symbol: "AAPL", price: "185.92", change: "1.2%", isUp: true },
             { symbol: "MSFT", price: "402.56", change: "0.8%", isUp: true },
@@ -264,10 +260,12 @@
             const stock = stocks[stockIndex];
             const stockElement = document.getElementById('stock-display');
             
+            // Determine styling and arrow direction based on isUp boolean
             const colorClass = stock.isUp ? 'positive-data' : 'negative-data';
-            const arrow = stock.isUp ? '&#9650;' : '&#9660;';
+            const arrow = stock.isUp ? '&#9650;' : '&#9660;'; // HTML entity for Up/Down solid triangles
             const sign = stock.isUp ? '+' : '-';
 
+            // Constructing the HTML structure for the stock item
             stockElement.innerHTML = `
                 <span class="stock-symbol">${stock.symbol}</span> 
                 <span class="${colorClass}">${arrow} $${stock.price} (${sign}${stock.change})</span>
