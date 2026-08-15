@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Mirror</title>
+    <style>
+        /* --- Base Magic Mirror Styles --- */
+        body {
+            background-color: #000;
+            color: #fff; /* White text on black background for the mirror effect */
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            overflow: hidden; /* Prevents scrollbars */
+        }
+
+        /* --- Layout Columns (Based on your sketch) --- */
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 40%;
+            height: 100%;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 55%;
+            height: 100%;
+        }
+
+        /* --- Top Left: Time & Date --- */
+        .time-container {
+            margin-top: 20px;
+        }
+        #time {
+            font-size: 6rem;
+            font-weight: bold;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+        #date {
+            font-size: 2rem;
+            color: #aaa; /* Slightly dimmed so it doesn't overpower the time */
+        }
+
+        /* --- Bottom Left: Prompt --- */
+        .prompt-container {
+            margin-bottom: 20px;
+            border-left: 4px solid #555; /* Subtle styling to box it out */
+            padding-left: 20px;
+        }
+        #prompt {
+            font-size: 1.8rem;
+            font-style: italic;
+        }
+
+        /* --- Top Right: Weather Map --- */
+        .weather-container {
+            height: 65%;
+            border: 2px solid #222;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #111;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            /* A CSS filter to make the map darker and fit the mirror aesthetic better */
+            filter: invert(90%) hue-rotate(180deg) contrast(120%); 
+        }
+
+        /* --- Bottom Right: Stocks --- */
+        .stock-container {
+            height: 25%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 2px solid #222;
+            border-radius: 10px;
+        }
+        .stock-header {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .stock-item {
+            font-size: 2.5rem;
+            text-align: center;
+            animation: fade 5s infinite; /* Smooth transition between stocks */
+        }
+        .positive { color: #4caf50; } /* Green for up */
+        .negative { color: #f44336; } /* Red for down */
+
+        @keyframes fade {
+            0%, 100% { opacity: 0; }
+            10%, 90% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="left-column">
+        <div class="time-container">
+            <div id="time">00:00:00</div>
+            <div id="date">Loading...</div>
+        </div>
+
+        <div class="prompt-container">
+            <div id="prompt">Loading affirmation...</div>
+        </div>
+    </div>
+
+    <div class="right-column">
+        <div class="weather-container">
+            <iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=f&metricWind=mph&zoom=8&overlay=radar&product=radar&marker=true&lat=42.03&lon=-93.62"></iframe>
+        </div>
+
+        <div class="stock-container">
+            <div class="stock-header">Market Watch</div>
+            <div id="stock-display" class="stock-item positive">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Clock and Date Logic ---
+        function updateTime() {
+            const now = new Date();
+            
+            // Format Time (12 hour format with seconds)
+            const timeOptions = { hour: 'numeric', minute: '2-digit', second: '2-digit' };
+            document.getElementById('time').textContent = now.toLocaleTimeString('en-US', timeOptions);
+            
+            // Format Date (e.g., "Monday, January 1, 2024")
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString('en-US', dateOptions);
+        }
+        
+        setInterval(updateTime, 1000); // Update every 1 second
+        updateTime(); // Initialize immediately
+
+        // --- 2. Daily Prompt Logic ---
+        const affirmations = [
+            "You are capable of amazing things today.",
+            "Stay focused, stay positive.",
+            "Every day is a fresh start.",
+            "Embrace the challenges ahead.",
+            "You have the power to create change."
+        ];
+        
+        function rotatePrompt() {
+            const randomIndex = Math.floor(Math.random() * affirmations.length);
+            document.getElementById('prompt').textContent = affirmations[randomIndex];
+        }
+        
+        setInterval(rotatePrompt, 3600000); // Rotates every hour (3,600,000 ms)
+        rotatePrompt();
+
+        // --- 3. Rotating Stocks Logic ---
+        // Note: These are simulated values for the layout. 
+        const stocks = [
+            { symbol: "AAPL", price: "185.92", change: "+1.2%", isUp: true },
+            { symbol: "MSFT", price: "402.56", change: "+0.8%", isUp: true },
+            { symbol: "TSLA", price: "194.05", change: "-2.1%", isUp: false },
+            { symbol: "AMZN", price: "174.12", change: "+1.5%", isUp: true }
+        ];
+        
+        let stockIndex = 0;
+        function rotateStocks() {
+            const stock = stocks[stockIndex];
+            const stockElement = document.getElementById('stock-display');
+            
+            stockElement.innerHTML = `${stock.symbol} &nbsp; $${stock.price} &nbsp; ${stock.change}`;
+            stockElement.className = `stock-item ${stock.isUp ? 'positive' : 'negative'}`;
+            
+            stockIndex = (stockIndex + 1) % stocks.length;
+        }
+        
+        setInterval(rotateStocks, 5000); // Rotates every 5 seconds, syncing with CSS animation
+        rotateStocks();
+    </script>
+</body>
+</html>
