@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magic Mirror</title>
     
+    <!-- Google Digital Font -->
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
@@ -23,7 +24,7 @@
             overflow: hidden;
         }
 
-        /* --- Main Layout: Top Section (Left & Right) --- */
+        /* --- Top Layout: Left & Right Columns --- */
         .top-section {
             display: flex;
             justify-content: space-between;
@@ -35,7 +36,7 @@
         .left-column {
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Centers elements in the open space */
+            justify-content: center;
             align-items: center;
             width: 45%;
             height: 100%;
@@ -51,22 +52,22 @@
             height: 100%;
         }
 
-        /* --- Common Border Styling (Emblems) --- */
+        /* --- Emblem Border Styling --- */
         .module-border {
-            border: 2px solid #333; /* Dark grey border */
+            border: 2px solid #333;
             border-radius: 15px;
             padding: 25px;
-            background: rgba(10, 10, 10, 0.6); /* Slight background to separate from pure black */
+            background: rgba(10, 10, 10, 0.6);
         }
 
-        /* --- Top Left: Time & Date --- */
+        /* --- Time & Date Module --- */
         .time-container {
             text-align: center;
-            margin-bottom: 40px; /* Spacing between clock and stocks */
+            margin-bottom: 40px;
             width: 80%;
         }
         #time {
-            font-family: 'Share Tech Mono', monospace; /* Digital Font */
+            font-family: 'Share Tech Mono', monospace;
             font-size: 7rem;
             line-height: 1;
             margin-bottom: 10px;
@@ -79,11 +80,11 @@
             letter-spacing: 1px;
         }
 
-        /* --- Bottom Left: Stocks --- */
+        /* --- Stock Ticker Module --- */
         .stock-container {
             width: 80%;
             text-align: center;
-            opacity: 0.6; /* Slightly transparent/less bright */
+            opacity: 0.65;
         }
         .stock-header {
             font-size: 1rem;
@@ -100,28 +101,28 @@
             animation: fade 5s infinite;
         }
         .stock-symbol {
-            color: #aaa; /* Grey/White for company name */
+            color: #aaa;
             font-weight: bold;
         }
-        .positive-data { color: #4caf50; } /* Green for up */
-        .negative-data { color: #f44336; } /* Red for down */
+        .positive-data { color: #4caf50; }
+        .negative-data { color: #f44336; }
 
-        /* --- Right: Weather Map --- */
+        /* --- Weather Map Module (Pure Grayscale) --- */
         .weather-container {
             width: 100%;
-            height: 80%; /* Shrunk slightly for aesthetics */
-            padding: 10px; /* Border padding */
+            height: 80%;
+            padding: 10px;
         }
         iframe {
             width: 100%;
             height: 100%;
             border: none;
             border-radius: 10px;
-            /* CSS Filter trick to create a dark, desaturated map while keeping some storm brightness */
-            filter: grayscale(60%) invert(95%) hue-rotate(180deg) contrast(150%);
+            /* Entirely Grayscale Filter */
+            filter: grayscale(100%) invert(90%) contrast(150%);
         }
 
-        /* --- Bottom Section: Greeting --- */
+        /* --- Bottom Greeting Section --- */
         .bottom-section {
             height: 15%;
             width: 100%;
@@ -130,11 +131,11 @@
             align-items: flex-end;
         }
         #greeting {
-            font-size: 4rem;
+            font-size: 3.2rem;
             font-weight: 300;
-            letter-spacing: 3px;
-            opacity: 0.3; /* Large but transparent */
-            text-transform: lowercase;
+            letter-spacing: 2px;
+            opacity: 0.35;
+            text-align: center;
             margin-bottom: 10px;
         }
 
@@ -147,6 +148,7 @@
 <body>
 
     <div class="top-section">
+        <!-- Left Column -->
         <div class="left-column">
             <div class="time-container module-border">
                 <div id="time">00:00:00</div>
@@ -159,6 +161,7 @@
             </div>
         </div>
 
+        <!-- Right Column -->
         <div class="right-column">
             <div class="weather-container module-border">
                 <iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=f&metricWind=mph&zoom=8&overlay=radar&product=radar&marker=true&lat=42.03&lon=-93.62"></iframe>
@@ -166,40 +169,89 @@
         </div>
     </div>
 
+    <!-- Bottom Greeting -->
     <div class="bottom-section">
-        <div id="greeting">loading...</div>
+        <div id="greeting">Loading...</div>
     </div>
 
     <script>
-        // --- 1. Clock, Date, and Greeting Logic ---
-        function updateTimeAndGreeting() {
+        // --- 1. Quarterly Prompt Bank ---
+        const quarterlyPrompts = {
+            q1: [ // 00:00 - 05:59 (Early Morning / Night)
+                "Good early morning, Rohan. May your rest be restorative.",
+                "Good early morning, Rohan. Focus on recovery and peace.",
+                "Good early morning, Rohan. Preparing for a productive day ahead.",
+                "Good early morning, Rohan. A quiet start to the day."
+            ],
+            q2: [ // 06:00 - 11:59 (Morning)
+                "Good morning, Rohan. Wishing you a focused and successful day.",
+                "Good morning, Rohan. Prioritize your key objectives today.",
+                "Good morning, Rohan. Maintain momentum and clarity.",
+                "Good morning, Rohan. Prepared to make meaningful progress."
+            ],
+            q3: [ // 12:00 - 17:59 (Afternoon)
+                "Good afternoon, Rohan. Stay consistent and driven.",
+                "Good afternoon, Rohan. Keep up the strong momentum.",
+                "Good afternoon, Rohan. Review your progress and finish strong.",
+                "Good afternoon, Rohan. Focused effort yields great results."
+            ],
+            q4: [ // 18:00 - 23:59 (Evening)
+                "Good evening, Rohan. Reflect on today's accomplishments.",
+                "Good evening, Rohan. Time to wind down and recharge.",
+                "Good evening, Rohan. Great work on today's efforts.",
+                "Good evening, Rohan. Prepare for a restful night."
+            ]
+        };
+
+        let currentQuarter = -1;
+
+        function updateQuarterlyPrompt(hour) {
+            let quarterKey = "";
+            let quarterIndex = 0;
+
+            if (hour >= 0 && hour < 6) {
+                quarterKey = "q1";
+                quarterIndex = 1;
+            } else if (hour >= 6 && hour < 12) {
+                quarterKey = "q2";
+                quarterIndex = 2;
+            } else if (hour >= 12 && hour < 18) {
+                quarterKey = "q3";
+                quarterIndex = 3;
+            } else {
+                quarterKey = "q4";
+                quarterIndex = 4;
+            }
+
+            // Only update prompt if a new quarter is reached or on page load
+            if (currentQuarter !== quarterIndex) {
+                currentQuarter = quarterIndex;
+                const bank = quarterlyPrompts[quarterKey];
+                const randomIndex = Math.floor(Math.random() * bank.length);
+                document.getElementById('greeting').textContent = bank[randomIndex];
+            }
+        }
+
+        // --- 2. Time & Date Logic ---
+        function updateTime() {
             const now = new Date();
             
-            // Time
-            const timeOptions = { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: false }; // Set hour12: true for AM/PM
+            // Format Digital Clock
+            const timeOptions = { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: false };
             document.getElementById('time').textContent = now.toLocaleTimeString('en-US', timeOptions);
             
-            // Date
+            // Format Date
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
             document.getElementById('date').textContent = now.toLocaleDateString('en-US', dateOptions);
 
-            // Personalized Greeting based on hour
-            const hour = now.getHours();
-            let greetingText = "";
-            if (hour >= 5 && hour < 12) {
-                greetingText = "Good Morning Rohan";
-            } else if (hour >= 12 && hour < 17) {
-                greetingText = "Good Afternoon Rohan";
-            } else {
-                greetingText = "Good Evening Rohan";
-            }
-            document.getElementById('greeting').textContent = greetingText;
+            // Check and update prompt based on current hour
+            updateQuarterlyPrompt(now.getHours());
         }
         
-        setInterval(updateTimeAndGreeting, 1000);
-        updateTimeAndGreeting();
+        setInterval(updateTime, 1000);
+        updateTime();
 
-        // --- 2. Rotating Stocks Logic ---
+        // --- 3. Rotating Stock Ticker Logic ---
         const stocks = [
             { symbol: "AAPL", price: "185.92", change: "1.2%", isUp: true },
             { symbol: "MSFT", price: "402.56", change: "0.8%", isUp: true },
@@ -212,12 +264,10 @@
             const stock = stocks[stockIndex];
             const stockElement = document.getElementById('stock-display');
             
-            // Determine styling and arrow direction based on isUp boolean
             const colorClass = stock.isUp ? 'positive-data' : 'negative-data';
-            const arrow = stock.isUp ? '&#9650;' : '&#9660;'; // HTML entity for Up/Down solid triangles
+            const arrow = stock.isUp ? '&#9650;' : '&#9660;';
             const sign = stock.isUp ? '+' : '-';
 
-            // Constructing the HTML structure for the stock item
             stockElement.innerHTML = `
                 <span class="stock-symbol">${stock.symbol}</span> 
                 <span class="${colorClass}">${arrow} $${stock.price} (${sign}${stock.change})</span>
